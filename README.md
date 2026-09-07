@@ -33,7 +33,7 @@ An automated web scraper and real-time element monitoring dashboard. Track speci
 Clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/yourusername/universal-web-monitor.git
+git clone https://github.com/arvinourian/universal-web-monitor.git
 cd universal-web-monitor
 pip install -r requirements.txt
 ```
