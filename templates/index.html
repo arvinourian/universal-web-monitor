@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Web Monitor</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        surface: '#09090b',
+                        card: '#121215',
+                        border: '#27272a',
+                        muted: '#71717a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Sleek scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col font-sans antialiased text-sm">
+
+    <!-- Header -->
+    <header class="border-b border-zinc-900 bg-zinc-950/80 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-750 flex items-center justify-center shadow-sm">
+                    <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a10 10 0 1 0 10 10"></path>
+                        <path d="M12 6a6 6 0 1 0 6 6"></path>
+                        <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
+                        <path d="M12 12l6.5-6.5" class="text-emerald-300"></path>
+                    </svg>
+                </div>
+                <span class="font-semibold text-zinc-100 tracking-tight">Universal Web Monitor</span>
+            </div>
+
+            <!-- Status Indicator -->
+            <div id="statusBadge" class="flex items-center space-x-2 px-2.5 py-1 rounded-full text-xs bg-zinc-900 border border-zinc-800 text-zinc-400">
+                <span class="w-2 h-2 rounded-full bg-zinc-600" id="statusDot"></span>
+                <span id="statusText">Idle</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+            <!-- LEFT: Configuration Form (5 cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                
+                <!-- Target Settings Card -->
+                <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 space-y-3.5">
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Target Settings</h2>
+
+                    <!-- Target URL -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-medium text-zinc-300">Target Website URL</label>
+                        <input type="url" id="targetUrl" placeholder="https://example.com/page" 
+                            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-zinc-600 transition text-zinc-100 placeholder-zinc-600">
+                    </div>
+
+                    <!-- Selector Type & Interval -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-medium text-zinc-300">Selector Type</label>
+                            <select id="selectorType" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:border-zinc-600 transition text-zinc-100">
+                                <option value="xpath">XPath</option>
+                                <option value="full_xpath">Full XPath</option>
+                                <option value="css">CSS Selector</option>
+                                <option value="regex">Regex Group</option>
+                                <option value="full_text">Full Page Content</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-medium text-zinc-300">Interval (seconds)</label>
+                            <input type="number" id="checkInterval" min="3" value="30" 
+                                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-zinc-600 transition text-zinc-100">
+                        </div>
+                    </div>
+
+                    <!-- Selector Input -->
+                    <div id="selectorInputGroup" class="space-y-1">
+                        <label id="selectorLabel" class="block text-xs font-medium text-zinc-300">XPath Expression</label>
+                        <input type="text" id="targetSelector" placeholder="//*[@id='element-id']/div[2]" 
+                            class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-zinc-600 transition text-zinc-100 placeholder-zinc-600">
+                    </div>
+
+                    <!-- Test Button & Preview -->
+                    <div class="pt-1">
+                        <button type="button" id="btnTestSelector" class="w-full bg-zinc-800/80 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 py-1.5 rounded-lg text-xs font-medium flex items-center justify-center space-x-1.5 transition">
+                            <i class="fa-solid fa-play text-[10px]"></i>
+                            <span>Test Extraction</span>
+                        </button>
+                        
+                        <div id="testResultBox" class="hidden mt-2 p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs">
+                            <!-- Populated on test -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Card -->
+                <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 space-y-3">
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Notifications</h2>
+
+                    <!-- System & Sound Options -->
+                    <div class="space-y-2">
+                        <label class="flex items-center justify-between cursor-pointer text-xs text-zinc-300 hover:text-zinc-100 py-0.5">
+                            <span>Desktop Toast Notification</span>
+                            <input type="checkbox" id="chkDesktop" checked class="rounded bg-zinc-800 border-zinc-700 text-zinc-100 focus:ring-0">
+                        </label>
+                        <label class="flex items-center justify-between cursor-pointer text-xs text-zinc-300 hover:text-zinc-100 py-0.5">
+                            <span>Audible Alert Sound</span>
+                            <input type="checkbox" id="chkSound" checked class="rounded bg-zinc-800 border-zinc-700 text-zinc-100 focus:ring-0">
+                        </label>
+                    </div>
+
+                    <!-- Telegram Section -->
+                    <div class="pt-2 border-t border-zinc-800/60 space-y-2.5">
+                        <label class="flex items-center justify-between cursor-pointer text-xs text-zinc-300 hover:text-zinc-100">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fa-brands fa-telegram text-sky-400"></i>
+                                <span>Telegram Bot Notifications</span>
+                            </span>
+                            <input type="checkbox" id="chkTelegram" class="rounded bg-zinc-800 border-zinc-700 text-zinc-100 focus:ring-0">
+                        </label>
+
+                        <!-- Expandable Telegram Inputs -->
+                        <div id="telegramConfigBox" class="hidden space-y-2.5 pt-2 border-t border-zinc-800/40">
+                            <div class="space-y-1">
+                                <label class="block text-[11px] text-zinc-400">Bot API Token</label>
+                                <input type="text" id="telegramToken" placeholder="123456789:ABCdefGhIJKlmNoPQRstuvwxYZ" 
+                                    class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-zinc-600 text-zinc-100">
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[11px] text-zinc-400">Chat ID <span class="text-zinc-500">(Optional — auto-detected)</span></label>
+                                <input type="text" id="telegramChatId" placeholder="Auto-detected on /start" 
+                                    class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-zinc-600 text-zinc-100">
+                            </div>
+
+                            <button type="button" id="btnTestTelegram" class="w-full bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/40 py-1.5 rounded-lg text-xs font-medium transition">
+                                Test Bot Connection
+                            </button>
+                            <div id="tgTestResult" class="hidden text-xs p-2 rounded-lg"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Primary Action Controls -->
+                <div class="grid grid-cols-2 gap-2.5 pt-1">
+                    <button type="button" id="btnStart" class="bg-zinc-100 hover:bg-white text-zinc-900 font-semibold py-2.5 px-4 rounded-lg transition flex items-center justify-center space-x-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-play text-xs"></i>
+                        <span>Start Monitoring</span>
+                    </button>
+                    <button type="button" id="btnStop" disabled class="bg-zinc-800/60 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/40 font-semibold py-2.5 px-4 rounded-lg transition flex items-center justify-center space-x-1.5 disabled:opacity-30 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-stop text-xs"></i>
+                        <span>Stop</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: Value Display & Terminal (7 cols) -->
+            <div class="lg:col-span-7 space-y-4 flex flex-col">
+                
+                <!-- Value & Stats Banner -->
+                <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-3 text-xs text-zinc-400">
+                        <span class="font-medium text-zinc-300">Extracted Element Value</span>
+                        <span id="lastCheckText">Not checked yet</span>
+                    </div>
+
+                    <!-- Extracted Value Display -->
+                    <div class="bg-zinc-950 border border-zinc-800/80 rounded-lg p-3.5 flex items-center justify-center min-h-[56px] text-center">
+                        <span id="liveValueDisplay" class="font-mono text-xl font-medium text-zinc-200 break-all">—</span>
+                    </div>
+
+                    <!-- Mini Stats Grid -->
+                    <div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs">
+                        <div class="bg-zinc-950/40 border border-zinc-800/60 rounded-lg py-1.5">
+                            <span class="text-zinc-500 block text-[11px]">Checks</span>
+                            <span id="statChecks" class="font-mono font-medium text-zinc-300">0</span>
+                        </div>
+                        <div class="bg-zinc-950/40 border border-zinc-800/60 rounded-lg py-1.5">
+                            <span class="text-zinc-500 block text-[11px]">Changes</span>
+                            <span id="statChanges" class="font-mono font-medium text-emerald-400">0</span>
+                        </div>
+                        <div class="bg-zinc-950/40 border border-zinc-800/60 rounded-lg py-1.5">
+                            <span class="text-zinc-500 block text-[11px]">Elapsed</span>
+                            <span id="statElapsed" class="font-mono font-medium text-zinc-400">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Log Console -->
+                <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-xl flex-1 flex flex-col min-h-[360px] overflow-hidden">
+                    
+                    <!-- Console Header -->
+                    <div class="bg-zinc-950/60 px-3.5 py-2.5 border-b border-zinc-800/80 flex items-center justify-between text-xs">
+                        <div class="flex items-center space-x-2 text-zinc-400">
+                            <i class="fa-solid fa-terminal text-[11px] text-zinc-500"></i>
+                            <span class="font-medium text-zinc-300">Console Logs</span>
+                        </div>
+
+                        <div class="flex items-center space-x-3 text-zinc-400 text-xs">
+                            <label class="flex items-center space-x-1.5 cursor-pointer select-none">
+                                <input type="checkbox" id="chkAutoScroll" checked class="rounded bg-zinc-800 border-zinc-700 text-zinc-100 focus:ring-0">
+                                <span class="text-[11px]">Auto-scroll</span>
+                            </label>
+                            <button type="button" id="btnClearLogs" class="text-zinc-500 hover:text-zinc-300 transition text-[11px]">
+                                Clear
+                            </button>
+                            <button type="button" id="btnCopyLogs" class="text-zinc-500 hover:text-zinc-300 transition text-[11px]">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Console Body -->
+                    <div id="terminalWindow" class="font-mono flex-1 bg-zinc-950 p-3.5 overflow-y-auto max-h-[460px] text-xs space-y-1.5 select-text text-zinc-400">
+                        <div class="text-zinc-600">Console ready. Configure target settings and click "Start Monitoring".</div>
+                    </div>
+
+                    <!-- Console Footer -->
+                    <div class="bg-zinc-950/60 border-t border-zinc-800/80 px-3.5 py-1.5 flex items-center justify-between text-[11px] text-zinc-500">
+                        <div class="flex items-center space-x-2">
+                            <span id="sseStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span id="sseStatusText">Connected</span>
+                        </div>
+                        <div id="logCountText">0 entries</div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Script -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
