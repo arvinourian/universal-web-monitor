@@ -159,8 +159,4 @@ universal-web-monitor/
     └── index.html         # Minimalist dark-mode dashboard interface
 ```
 
----
 
-## 🛡️ License
-
-This project is licensed under the [MIT License](LICENSE). Feel free to modify and use it for your personal or commercial projects.
