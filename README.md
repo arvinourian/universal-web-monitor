@@ -113,6 +113,10 @@ To receive push notifications straight to your mobile phone via Telegram:
    - Paste your **Bot API Token** into the input field.
    - Click **"Test Bot Connection"**. You will immediately receive a test notification on your phone!
 
+<p align="center">
+  <img src="docs/telegram-alert.png" alt="Telegram Bot Alert Notification" width="380">
+</p>
+
 ---
 
 ## 💻 Standalone CLI Usage (Headless Mode)
