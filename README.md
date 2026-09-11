@@ -1,6 +1,6 @@
 # Universal Webpage & Element Monitor
 
-An automated web scraper and real-time element monitoring dashboard. Track specific element changes across any website and receive instant multi-channel alerts (Windows Desktop Toasts, audible chimes, and Telegram Bot notifications).
+An automated web element monitoring dashboard. Track specific element changes across any website and receive instant multi-channel alerts (Windows Desktop Toasts, audible chimes, and Telegram Bot notifications).
 
 ---
 
